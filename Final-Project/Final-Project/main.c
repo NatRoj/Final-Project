@@ -78,5 +78,14 @@ void USART_init(void){
 	UBRR0L = (uint8_t)(BAUD_PRESCALER);		//Setting Baud rate
 	UCSR0B = (1<<RXEN0)|(1<<TXEN0);			//Enable receiver (RXEN0) and transmitter (TXENO)
 	UCSR0C = (1<<UCSR0B)|(3<<UCSZ00);		//From datasheet, set format:8data, 2stop bit
+	UCSR0B |= (1 << RXCIE0); // Enable the USART Receive Complete interrupt (USART_RXC)
+	sei(); // Enable the Global Interrupt Enable flag so that interrupts can be processed
+}
+
+ISR(USART_RX_vect)
+{
+	char ReceivedByte;
+	ReceivedByte = UDR0; // Fetch the received byte value into the variable "ByteReceived"
+	UDR0 = ReceivedByte; // Echo back the received byte back to the computer
 }
 
