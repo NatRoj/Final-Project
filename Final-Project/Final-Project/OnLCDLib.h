@@ -157,17 +157,17 @@ ________________________________________________________________________________
 // Register selection signal - RS
 #define LCD_RS_CONTROL_DDR 					DDRD
 #define LCD_RS_CONTROL_PORT 				PORTD
-#define LCD_RS_PIN							PD0
+#define LCD_RS_PIN							PD2
 
 // Read/write signal - RW
 #define LCD_RW_CONTROL_DDR 					DDRD
 #define LCD_RW_CONTROL_PORT 				PORTD
-#define LCD_RW_PIN							PD1
+#define LCD_RW_PIN							PD3
 
 // Enable signal - E
 #define LCD_E_CONTROL_DDR 					DDRD
 #define LCD_E_CONTROL_PORT 					PORTD
-#define LCD_E_PIN 							PD2
+#define LCD_E_PIN 							PD4
 
 // LCD type
 #define LCD_NR_OF_CHARACTERS 				16 	// e.g 16 if LCD is 16x2 type
