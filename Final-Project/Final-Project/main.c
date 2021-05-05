@@ -36,7 +36,7 @@ int main(void)
 			DHT11DisplayTemperature();			//Display Temp
 			LCDGotoXY(8,1);
 			LCDWriteString("B:");				//Display Brightness
-			adc_value = read_adc(5);
+			adc_value = ((float)read_adc(0)/5050)*100;
 			LCDWriteInt(adc_value,3);
 			LCDWriteString("%");
 			LCDGotoXY(1,2);
