@@ -7,6 +7,8 @@
 
 #include <avr/io.h>
 #include  <avr/interrupt.h>
+#include <avr/eeprom.h> 
+#include <string.h>
 #define F_CPU 16000000UL
 #define USART_BAUDRATE 9600
 #define BAUD_PRESCALER (((F_CPU / (USART_BAUDRATE * 16UL))) - 1)
@@ -19,23 +21,27 @@ void adc_init(void);							//Function to initialize/configure the ADC
 void USART_init(void);
 void USART_send( unsigned char data);			//Function that sends a char over the serial port
 void USART_putstring(char* StringPtr);			//Function that sends a string over the serial port
+char* itoa(int, char* , int);					//the itoa function
 
 uint16_t read_adc(uint8_t channel);				//Function to read an arbitrary analog pin
 uint16_t adc_value;								//Variable used to store the value read from the ADC
 int8_t DHTreturnCode;
 int dt;  //Length of time between measurements in s
-int delay;   //Length of time between measurements in ns
 int temp;    //Boolean whether to display temperature
 int bright;  //Boolean whether to display brightness
 int humid;   //Boolean whether to display humidity
 int all;
 int fahren;  //Boolean to determine whether temp is C or F
+int addr = 1; 
+int sensorValue = 0;
+int readValue = 2;
+char buffer[5];	
 
 int main(void)
 {
 	all = 1;
-	//humid = 1;
-	//Initialize LCD
+	dt = 1;
+	fahren = 0;
 	LCDSetup(LCD_CURSOR_NONE);	
 	adc_init();
 	USART_init();
@@ -49,13 +55,12 @@ int main(void)
 	USART_putstring("A for all measurements. \r \n");
 	USART_putstring("To display temperature in Fahrenheit, enter the command F. \r \n");
 	USART_putstring("To display temperature in Celsius, enter the command C. \r \n");
+	USART_putstring("To store brightness in EEPROM, enter the command E. \r \n");
+	USART_putstring("To read brightness stored in EEPROM, enter the command R. \r \n");
 	
-	dt = 1;
     while (1) 
     {
-		
-		delay = dt*1000;		//Delay is in ms
-		_delay_ms(delay);
+		_delay_ms(dt*1000);
 	
 		DHTreturnCode = DHT11ReadData();		//Function to read and check the sensor data
 		if(DHTreturnCode == -1){
@@ -165,6 +170,22 @@ ISR(USART_RX_vect) {
 	else if (ReceivedByte == 'C') {
 		fahren = 0;
 	}
+	else if (ReceivedByte == 'E') {
+		while (!eeprom_is_ready());
+		cli();
+		eeprom_write_word((uint16_t*)addr, adc_value);
+		sei();
+	}
+	else if (ReceivedByte == 'R') {
+		while (!eeprom_is_ready());
+		cli();
+		readValue = eeprom_read_word((uint16_t*)addr); // => sensorValue
+		sei();
+		itoa(readValue, buffer,10);
+		USART_putstring("\r \n Stored brightness value = ");
+		USART_putstring(buffer);
+	}
+	
 	UDR0 = ReceivedByte; //echo
 	ReceivedByte = UDR0; // Next char
 }
