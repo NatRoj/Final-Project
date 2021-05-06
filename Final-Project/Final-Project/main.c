@@ -50,9 +50,10 @@ int main(void)
 	USART_putstring("To display temperature in Fahrenheit, enter the command F. \r \n");
 	USART_putstring("To display temperature in Celsius, enter the command C. \r \n");
 	
+	dt = 1;
     while (1) 
     {
-		dt = 0;
+		
 		delay = dt*1000;		//Delay is in ms
 		_delay_ms(delay);
 	
@@ -164,6 +165,7 @@ ISR(USART_RX_vect) {
 	else if (ReceivedByte == 'C') {
 		fahren = 0;
 	}
+	UDR0 = ReceivedByte; //echo
 	ReceivedByte = UDR0; // Next char
 }
 
