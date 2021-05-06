@@ -32,7 +32,9 @@ int bright;  //Boolean whether to display brightness
 int humid;   //Boolean whether to display humidity
 int all;
 int fahren;  //Boolean to determine whether temp is C or F
-int addr = 1; 
+int Baddr = 1;
+int Taddr = 2;
+int Haddr = 3; 
 int sensorValue = 0;
 int readValue = 2;
 char buffer[5];	
@@ -55,9 +57,13 @@ int main(void)
 	USART_putstring("A for all measurements. \r \n");
 	USART_putstring("To display temperature in Fahrenheit, enter the command F. \r \n");
 	USART_putstring("To display temperature in Celsius, enter the command C. \r \n");
-	USART_putstring("To store brightness in EEPROM, enter the command E. \r \n");
-	USART_putstring("To read brightness stored in EEPROM, enter the command R. \r \n");
-	
+	USART_putstring("To store brightness in EEPROM, enter the command W. \r \n");
+	USART_putstring("To read brightness stored in EEPROM, enter the command D. \r \n");
+	USART_putstring("To store temperature (in C) in EEPROM, enter the command Q. \r \n");
+	USART_putstring("To read temperature (in C) stored in EEPROM, enter the command G. \r \n");	
+	USART_putstring("To store humidity in EEPROM, enter the command J. \r \n");
+	USART_putstring("To read humidity stored in EEPROM, enter the command K. \r \n");
+		
     while (1) 
     {
 		_delay_ms(dt*1000);
@@ -170,21 +176,47 @@ ISR(USART_RX_vect) {
 	else if (ReceivedByte == 'C') {
 		fahren = 0;
 	}
-	else if (ReceivedByte == 'E') {
+	else if (ReceivedByte == 'W') { //store brightness in EEPROM
 		while (!eeprom_is_ready());
 		cli();
-		eeprom_write_word((uint16_t*)addr, adc_value);
+		eeprom_write_word((uint16_t*)Baddr, adc_value);
 		sei();
 	}
-	else if (ReceivedByte == 'R') {
+	else if (ReceivedByte == 'D') { //read brightness stored in EEPROM
 		while (!eeprom_is_ready());
 		cli();
-		readValue = eeprom_read_word((uint16_t*)addr); // => sensorValue
+		readValue = eeprom_read_word((uint16_t*)Baddr); // => sensorValue
 		sei();
 		itoa(readValue, buffer,10);
 		USART_putstring("\r \n Stored brightness value = ");
 		USART_putstring(buffer);
 	}
+	else if (ReceivedByte == 'Q') { //store temperature (in C) in EEPROM
+		DHT11WriteTemperatureEEPROM();
+	}
+	else if (ReceivedByte == 'G') { //read temperature (in C) stored in EEPROM
+		while (!eeprom_is_ready());
+		cli();
+		readValue = eeprom_read_word((uint16_t*)Taddr); // => sensorValue
+		sei();
+		itoa(readValue, buffer,10);
+		USART_putstring("\r \n Stored temperature value = ");
+		USART_putstring(buffer);
+		USART_putstring("C \r \n");
+	}
+	else if (ReceivedByte == 'J') { //store humidity in EEPROM
+		DHT11WriteHumidityEEPROM();
+	}
+	else if (ReceivedByte == 'K') { //read humidity stored in EEPROMwhile (!eeprom_is_ready());
+		cli();
+		readValue = eeprom_read_word((uint16_t*)Haddr); // => sensorValue
+		sei();
+		itoa(readValue, buffer,10);
+		USART_putstring("\r \n Stored humidity value = ");
+		USART_putstring(buffer);
+		USART_putstring("% \r \n");
+	}
+	
 	
 	UDR0 = ReceivedByte; //echo
 	ReceivedByte = UDR0; // Next char

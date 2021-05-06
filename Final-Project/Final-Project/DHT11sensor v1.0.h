@@ -58,6 +58,7 @@ ________________________________________________________________________________
 	INCLUDES
 **************************************************************/
 #include <avr/io.h>
+#include <avr/eeprom.h> 
 #include <util/delay.h>
 #include "OnLCDLib.h"
 
@@ -77,7 +78,10 @@ ________________________________________________________________________________
 	FUNCTION PROTOTYPES
 **************************************************************/
 void DHT11Setup(void);
-void DHT11DisplayTemperature(void);
+void DHT11DisplayTemperatureC(void);
+void DHT11DisplayTemperatureF(void);
+void DHT11WriteTemperatureEEPROM(void);
+void DHT11WriteHumidityEEPROM(void);
 void DHT11DisplayHumidity(void);
 void DHT11ReadDataAvg(void);
 int8_t DHT11ReadData(void);
@@ -118,10 +122,24 @@ void DHT11DisplayTemperatureC(){
 	LCDData('C');
 }
 
+void DHT11WriteTemperatureEEPROM(void) {
+	while (!eeprom_is_ready());
+	cli();
+	eeprom_write_word((uint16_t*)2, DHT11Data[2]);
+	sei();
+}
+
 void DHT11DisplayHumidity(){
 	LCDWriteString("H:");
 	LCDWriteInt(DHT11Data[0], 2);
 	LCDData('%');
+}
+
+void DHT11WriteHumidityEEPROM(void) {
+	while (!eeprom_is_ready());
+	cli();
+	eeprom_write_word((uint16_t*)3, DHT11Data[0]);
+	sei();
 }
 
 void DHT11ReadDataAvg(){
