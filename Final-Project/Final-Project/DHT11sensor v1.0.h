@@ -104,7 +104,14 @@ void DHT11Setup(){
 	DHT11Init = 1;
 }
 
-void DHT11DisplayTemperature(){
+void DHT11DisplayTemperatureF(){
+	LCDWriteString("T:");
+	LCDWriteInt(((DHT11Data[2]*1.8)+32) + DHT_TEMP_ERROR_OFFSET, 2);
+	LCDData(0b11011111);
+	LCDData('F');
+}
+
+void DHT11DisplayTemperatureC(){
 	LCDWriteString("T:");
 	LCDWriteInt(DHT11Data[2] + DHT_TEMP_ERROR_OFFSET, 2);
 	LCDData(0b11011111);

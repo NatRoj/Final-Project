@@ -23,13 +23,13 @@ void USART_putstring(char* StringPtr);			//Function that sends a string over the
 uint16_t read_adc(uint8_t channel);				//Function to read an arbitrary analog pin
 uint16_t adc_value;								//Variable used to store the value read from the ADC
 int8_t DHTreturnCode;
-int dt = 1;  //Length of time between measurements in s
+int dt;  //Length of time between measurements in s
 int delay;   //Length of time between measurements in ns
 int temp;    //Boolean whether to display temperature
 int bright;  //Boolean whether to display brightness
 int humid;   //Boolean whether to display humidity
 int all;
-int fahren;  //Boolean to determine whether temp i
+int fahren;  //Boolean to determine whether temp is C or F
 
 int main(void)
 {
@@ -52,33 +52,42 @@ int main(void)
 	
     while (1) 
     {
-		delay = dt*1000000000;		//Delay is in ns
+		dt = 0;
+		delay = dt*1000;		//Delay is in ms
 		_delay_ms(delay);
+	
 		DHTreturnCode = DHT11ReadData();		//Function to read and check the sensor data
-		
 		if(DHTreturnCode == -1){
 			LCDHome();
 			LCDWriteString("Checksum Error");	//Error message on lcd to show data was received incorrectly
 		} else {
 			if (all == 1) {
 				LCDHome();
-				DHT11DisplayTemperature();			//Display Temp
+				if (fahren == 1) {
+					DHT11DisplayTemperatureF();			//Display Temp F
+				} else {
+					DHT11DisplayTemperatureC();			//Display Temp C
+				}
 				LCDGotoXY(8,1);
 				LCDWriteString("B:");				//Display Brightness
-				adc_value = read_adc(5);
+				adc_value =  ((float)read_adc(0)/2000)*100;
 				LCDWriteInt(adc_value,3);
 				LCDWriteString("%");
 				LCDGotoXY(1,2);
 				DHT11DisplayHumidity();				//Display Humidity
 			}
 			else if (temp == 1) {
-				LCDHome();
-				DHT11DisplayTemperature();			//Display Temp
+				LCDHome(); 
+				if (fahren == 1) {
+					DHT11DisplayTemperatureF();			//Display Temp F
+				} else {
+					DHT11DisplayTemperatureC();			//Display Temp C
+				}
 			}
 			else if (bright == 1) {
 				LCDHome();
 				LCDWriteString("B:");				//Display Brightness
-				adc_value = ((float)read_adc(0)/5050)*100;
+				adc_value =  ((float)read_adc(0)/5050)*100;
 				LCDWriteInt(adc_value,3);
 				LCDWriteString("%");
 			}
@@ -150,10 +159,10 @@ ISR(USART_RX_vect) {
 		humid = 0;
 	}
 	else if (ReceivedByte == 'F') {
-
+		fahren = 1;
 	}
 	else if (ReceivedByte == 'C') {
-
+		fahren = 0;
 	}
 	ReceivedByte = UDR0; // Next char
 }
