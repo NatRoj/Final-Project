@@ -28,9 +28,13 @@ int delay;   //Length of time between measurements in ns
 int temp;    //Boolean whether to display temperature
 int bright;  //Boolean whether to display brightness
 int humid;   //Boolean whether to display humidity
+int all;
+int fahren;  //Boolean to determine whether temp i
 
 int main(void)
 {
+	all = 1;
+	//humid = 1;
 	//Initialize LCD
 	LCDSetup(LCD_CURSOR_NONE);	
 	adc_init();
@@ -55,16 +59,33 @@ int main(void)
 		if(DHTreturnCode == -1){
 			LCDHome();
 			LCDWriteString("Checksum Error");	//Error message on lcd to show data was received incorrectly
-		} else{
-			LCDHome();
-			DHT11DisplayTemperature();			//Display Temp
-			LCDGotoXY(8,1);
-			LCDWriteString("B:");				//Display Brightness
-			adc_value = ((float)read_adc(0)/5050)*100;
-			LCDWriteInt(adc_value,3);
-			LCDWriteString("%");
-			LCDGotoXY(1,2);
-			DHT11DisplayHumidity();				//Display Humidity
+		} else {
+			if (all == 1) {
+				LCDHome();
+				DHT11DisplayTemperature();			//Display Temp
+				LCDGotoXY(8,1);
+				LCDWriteString("B:");				//Display Brightness
+				adc_value = read_adc(5);
+				LCDWriteInt(adc_value,3);
+				LCDWriteString("%");
+				LCDGotoXY(1,2);
+				DHT11DisplayHumidity();				//Display Humidity
+			}
+			else if (temp == 1) {
+				LCDHome();
+				DHT11DisplayTemperature();			//Display Temp
+			}
+			else if (bright == 1) {
+				LCDHome();
+				LCDWriteString("B:");				//Display Brightness
+				adc_value = ((float)read_adc(0)/5050)*100;
+				LCDWriteInt(adc_value,3);
+				LCDWriteString("%");
+			}
+			else if (humid == 1) {
+				LCDHome();
+				DHT11DisplayHumidity();				//Display Humidity
+			}
 		}
     }
 }
@@ -89,7 +110,7 @@ void USART_init(void){
 	UBRR0L = (uint8_t)(BAUD_PRESCALER);		//Setting Baud rate
 	UCSR0B = (1<<RXEN0)|(1<<TXEN0);			//Enable receiver (RXEN0) and transmitter (TXENO)
 	UCSR0C = (1<<UCSR0B)|(3<<UCSZ00);		//From datasheet, set format:8data, 2stop bit
-	UCSR0B |= (1 << RXCIE0); // Enable the USART Receive Complete interrupt (USART_RXC)
+	UCSR0B |= (1 << RXCIE0); // Enable the USART Receive Complete interrupt 
 	sei(); // Enable the Global Interrupt Enable flag so that interrupts can be processed
 }
 
@@ -98,9 +119,43 @@ ISR(USART_RX_vect) {
 	ReceivedByte = UDR0; // Fetch the received byte value into the variable "ByteReceived"
 	if (ReceivedByte == 'S') {
 		ReceivedByte = UDR0;
-		dt = ReceivedByte - 48;
+		dt = ReceivedByte - 48; //Change interval with which measurements are taken
 	}
-	UDR0 = ReceivedByte; // Echo back the received byte back to the computer
+	else if (ReceivedByte == 'T') {
+		LCDClear();
+		temp = 1;
+		all = 0;
+		bright = 0;
+		humid = 0;
+	}
+	else if (ReceivedByte == 'B') {
+		LCDClear();
+		bright = 1;
+		all = 0;
+		temp = 0;
+		humid = 0;
+	}
+	else if (ReceivedByte == 'H') {
+		LCDClear();
+		humid = 1;
+		all = 0;
+		bright = 0;
+		temp = 0;
+	}
+	else if (ReceivedByte == 'A') {
+		LCDClear();
+		all = 1;
+		temp = 0;
+		bright = 0;
+		humid = 0;
+	}
+	else if (ReceivedByte == 'F') {
+
+	}
+	else if (ReceivedByte == 'C') {
+
+	}
+	ReceivedByte = UDR0; // Next char
 }
 
 void USART_send(unsigned char data){
