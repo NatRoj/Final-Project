@@ -72,7 +72,7 @@ ________________________________________________________________________________
 #define SAMPLE_DELAY			1000 // DHT11 has a maximum sampling rate of 1 per second
 #define DHT_NR_OF_SAMPLES		5	 // Number of samples used for averaging the values
 #define DHT_TEMP_ERROR_OFFSET	0    // In degrees. If positive, will be added to final result, if negative, will be subtracted
-#define ADD_MINIMUM_DELAY		 	 // Comment out if you want to add the delay in your code
+//#define ADD_MINIMUM_DELAY		 	 // Comment out if you want to add the delay in your code
 
 /*************************************************************
 	FUNCTION PROTOTYPES
@@ -255,9 +255,11 @@ int8_t DHT11ReadData(){
 		return -1; // checksum error code
 	}
 	
+	/*
 	#ifdef ADD_MINIMUM_DELAY
 		_delay_ms(SAMPLE_DELAY);
 	#endif
+	*/
 	
 	/* OK return code */
 	return 1;

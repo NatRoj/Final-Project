@@ -82,7 +82,7 @@ int main(void)
 				}
 				LCDGotoXY(8,1);
 				LCDWriteString("B:");				//Display Brightness
-				adc_value =  ((float)read_adc(0)/2000)*100;
+				adc_value =  ((float)read_adc(0)/5050)*100;
 				LCDWriteInt(adc_value,3);
 				LCDWriteString("%");
 				LCDGotoXY(1,2);
@@ -190,6 +190,7 @@ ISR(USART_RX_vect) {
 		itoa(readValue, buffer,10);
 		USART_putstring("\r \n Stored brightness value = ");
 		USART_putstring(buffer);
+		USART_putstring(" % \r \n");
 	}
 	else if (ReceivedByte == 'Q') { //store temperature (in C) in EEPROM
 		DHT11WriteTemperatureEEPROM();
@@ -202,7 +203,7 @@ ISR(USART_RX_vect) {
 		itoa(readValue, buffer,10);
 		USART_putstring("\r \n Stored temperature value = ");
 		USART_putstring(buffer);
-		USART_putstring("C \r \n");
+		USART_putstring(" C \r \n");
 	}
 	else if (ReceivedByte == 'J') { //store humidity in EEPROM
 		DHT11WriteHumidityEEPROM();
@@ -214,7 +215,7 @@ ISR(USART_RX_vect) {
 		itoa(readValue, buffer,10);
 		USART_putstring("\r \n Stored humidity value = ");
 		USART_putstring(buffer);
-		USART_putstring("% \r \n");
+		USART_putstring(" % \r \n");
 	}
 	
 	
